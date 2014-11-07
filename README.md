@@ -1,4 +1,4 @@
-ITfoxtec.SAML2
+<a href="http://itfoxtec.com/Saml2">ITfoxtec.SAML2</a>
 ==============
 The ITfoxtec SAML 2.0 package adds SAML-P support on top of the SAML 2.0 token functionality implemented in the .NET framework. .NET implements a reasonably part of the SAML 2.0 token standard but it is completely lacking support for SAML-P. 
 
