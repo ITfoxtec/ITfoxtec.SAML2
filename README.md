@@ -7,4 +7,4 @@ The ITfoxtec SAML 2.0 package implements the most important parts of the SAML-P 
 The SAML 2.0 package is tested for compliance with Active Directory Federation Services (AD FS). 
 The Danish OIOSAML 2.0 profile is supported and tested for compliance with NemLog-in. 
 
-<a href="http://itfoxtec.com/Saml2">ITfoxtec.SAML2 project page</a> with description and link to NuGet.
+<a href="http://itfoxtec.com/Saml2">ITfoxtec.SAML2 Project Home Page</a> with description and link to NuGet.
