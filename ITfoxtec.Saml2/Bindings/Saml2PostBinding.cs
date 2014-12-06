@@ -60,7 +60,7 @@ namespace ITfoxtec.Saml2.Bindings
 <head>
     <meta charset=""utf-8"" />
     <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
-    <title>Home Page - My ASP.NET Application</title>
+    <title>SAML 2.0</title>
 </head>
 <body onload=""document.forms[0].submit()"">
     <noscript>
