@@ -3,7 +3,7 @@ using System.Xml.Linq;
 
 namespace ITfoxtec.Saml2.Schemas
 {
-    internal class Saml2Constants
+    public static class Saml2Constants
     {
         /// <summary>
         /// SAML Version Number.
@@ -22,11 +22,11 @@ namespace ITfoxtec.Saml2.Schemas
         /// <summary>
         /// The XML namespace of the SAML2 Assertion.
         /// </summary>
-        public static readonly XNamespace AssertionNamespaceX = XNamespace.Get(AssertionNamespace.OriginalString);
+        public static XNamespace AssertionNamespaceX = XNamespace.Get( AssertionNamespace.OriginalString );
         /// <summary>
         /// The XML Namespace Name of the SAML2 Assertion.
         /// </summary>
-        public static readonly XName AssertionNamespaceNameX = XNamespace.Xmlns + "saml2";
+        public static XName AssertionNamespaceNameX = XNamespace.Xmlns + "saml2";
 
         /// <summary>
         /// The XML namespace of the SAML2 Protocol.
@@ -35,13 +35,13 @@ namespace ITfoxtec.Saml2.Schemas
         /// <summary>
         /// The XML namespace of the SAML2 Protocol.
         /// </summary>
-        public static readonly XNamespace ProtocolNamespaceX = XNamespace.Get(ProtocolNamespace.OriginalString);
+        public static XNamespace ProtocolNamespaceX = XNamespace.Get( ProtocolNamespace.OriginalString );
         /// <summary>
         /// The XML Namespace Name of the SAML2 Protocol.
         /// </summary>
-        public static readonly XName ProtocolNamespaceNameX = XNamespace.Xmlns + "saml2p";
+        public static XName ProtocolNamespaceNameX = XNamespace.Xmlns + "saml2p";
 
-        public class Message
+        public static class Message
         {
             public const string SamlResponse = "SAMLResponse";
 
