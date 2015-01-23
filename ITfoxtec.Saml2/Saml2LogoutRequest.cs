@@ -56,6 +56,14 @@ namespace ITfoxtec.Saml2
                 SessionIndex = ReadClaimValue(identity, Saml2ClaimTypes.SessionIndex);
             }           
         }
+		
+        public Saml2LogoutRequest( string nameId, string nameIdFormat, string sessionIndex )
+        {
+            NotOnOrAfter = DateTime.UtcNow.AddMinutes( 10 );
+
+            NameId = new Saml2NameIdentifier( nameId, new Uri( nameIdFormat ) );
+            SessionIndex = sessionIndex;
+        }
 
         private static string ReadClaimValue(ClaimsIdentity identity, string claimType)
         {
@@ -108,6 +116,5 @@ namespace ITfoxtec.Saml2
                 throw new Saml2ResponseException("Not a SAML2 Logout Request.");
             }
         }
-
     }
 }
