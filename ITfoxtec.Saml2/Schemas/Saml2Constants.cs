@@ -47,6 +47,8 @@ namespace ITfoxtec.Saml2.Schemas
 
             public const string SamlRequest = "SAMLRequest";
 
+            public const string ArtifactResolve = "ArtifactResolve";
+
             public const string RelayState = "RelayState";
 
             public const string Assertion = "Assertion";
@@ -122,8 +124,14 @@ namespace ITfoxtec.Saml2.Schemas
             public const string Subject = "Subject";
 
             public const string SubjectConfirmation = "SubjectConfirmation";
-            
+
             public const string SubjectConfirmationData = "SubjectConfirmationData";
+
+            public const string Artifact = "Artifact";
+
+            public const string SamlArt = "SAMLart";
+            
+            public const string ArtifactResponse = "ArtifactResponse";
         }
     
     }

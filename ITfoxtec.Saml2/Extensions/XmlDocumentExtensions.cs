@@ -18,17 +18,20 @@ namespace ITfoxtec.Saml2
         /// <param name="certificate">The certificate used to sign the document</param>
         /// <param name="includeOption">Certificate include option</param>
         /// <param name="id">The is of the topmost element in the xmldocument</param>
-        internal static XmlDocument SignDocument(this XmlDocument xmlDocument, X509Certificate2 certificate, X509IncludeOption includeOption, string id)
+        /// <param name="removeKeyInfo">Set to true if key info should be removed from the signature.</param>
+        public static XmlDocument SignDocument(this XmlDocument xmlDocument, X509Certificate2 certificate, X509IncludeOption includeOption, string id, bool removeKeyInfo = false)
         {
             if (certificate == null)
             {
                 throw new ArgumentNullException("certificate");
             }
- 
+
             var signedXml = new Saml2SignedXml(xmlDocument);
             signedXml.ComputeSignature(certificate, includeOption, id);
 
             var issuer = xmlDocument.DocumentElement[Saml2Constants.Message.Issuer, Saml2Constants.AssertionNamespace.OriginalString];
+            if (removeKeyInfo)
+                signedXml.KeyInfo = null;
             xmlDocument.DocumentElement.InsertAfter(xmlDocument.ImportNode(signedXml.GetXml(), true), issuer);
             return xmlDocument;
         }
