@@ -8,8 +8,11 @@ using System.Web;
 using System.Xml;
 using ITfoxtec.Saml2.Schemas;
 using ITfoxtec.Saml2.Cryptography;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using ITfoxtec.Saml2.Util;
+using Security.Cryptography;
+using Security.Cryptography.X509Certificates;
 
 namespace ITfoxtec.Saml2.Bindings
 {
@@ -44,12 +47,26 @@ namespace ITfoxtec.Saml2.Bindings
 
             return this;
         }
-        
+
         private string SigneQueryString(string queryString, X509Certificate2 signingCertificate)
         {
-            var saml2Signed = new Saml2Sign(signingCertificate.PrivateKey);
-            SignatureAlgorithm = signingCertificate.PrivateKey.SignatureAlgorithm;
-            Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
+            if (signingCertificate.HasCngKey())
+            {
+                CngKey key = signingCertificate.GetCngPrivateKey();
+                using (RSACng rsa = new RSACng(key))
+                {
+                    rsa.SignatureHashAlgorithm = CngAlgorithm.Sha1;
+                    Saml2Sign saml2Signed = new Saml2Sign(rsa);
+                    SignatureAlgorithm = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                    Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
+                }
+            }
+            else
+            {
+                Saml2Sign saml2Signed = new Saml2Sign(signingCertificate.PrivateKey);
+                SignatureAlgorithm = signingCertificate.PrivateKey.SignatureAlgorithm;
+                Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
+            }
 
             return string.Join("&", queryString, string.Join("=", Saml2Constants.Message.Signature, HttpUtility.UrlEncode(Signature)));
         }
@@ -63,9 +80,19 @@ namespace ITfoxtec.Saml2.Bindings
                 yield return string.Join("=", Saml2Constants.Message.RelayState, HttpUtility.UrlEncode(RelayState));
             }
 
-            if(signingCertificate != null)
+            if (signingCertificate != null)
             {
-                yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm));
+                if (signingCertificate.HasCngKey())
+                {
+                    if (signingCertificate.GetCngPrivateKey().Algorithm.Algorithm == "RSA")
+                    {
+                        yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode("http://www.w3.org/2000/09/xmldsig#rsa-sha1"));
+                    }
+                }
+                else
+                {
+                    yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm));
+                }
             }
         }
 

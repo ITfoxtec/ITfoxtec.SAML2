@@ -17,6 +17,8 @@ using System.IdentityModel.Selectors;
 using ITfoxtec.Saml2.Cryptography;
 using System.Security.Cryptography;
 using System.Diagnostics;
+using Security.Cryptography;
+using Security.Cryptography.X509Certificates;
 
 namespace ITfoxtec.Saml2
 {
@@ -34,15 +36,32 @@ namespace ITfoxtec.Saml2
             if (decryptionCertificate != null)
             {
                 DecryptionCertificate = decryptionCertificate;
-                if (decryptionCertificate.PrivateKey == null)
+                if (decryptionCertificate.HasCngKey())
                 {
-                    throw new ArgumentException("No Private Key present in Decryption Certificate or missing private key read credentials.");
+                    CngKey key = decryptionCertificate.GetCngPrivateKey();
+                    if (key == null)
+                    {
+                        throw new ArgumentException("No Private Key present in Decryption Certificate or missing private key read credentials.");
+                    }
+
+                    if (key.Algorithm.Algorithm != "RSA")
+                    {
+                        throw new ArgumentException("The Private Key present in Decryption Certificate must be RSA.");
+                    }
                 }
-                if (!(decryptionCertificate.PrivateKey is RSA))
+                else
                 {
-                    throw new ArgumentException("The Private Key present in Decryption Certificate must be RSA.");
+                    if (decryptionCertificate.PrivateKey == null)
+                    {
+                        throw new ArgumentException("No Private Key present in Decryption Certificate or missing private key read credentials.");
+                    }
+                    if (!(decryptionCertificate.PrivateKey is RSA))
+                    {
+                        throw new ArgumentException("The Private Key present in Decryption Certificate must be RSA.");
+                    }
                 }
             }
+
             Saml2SecurityTokenHandler = Saml2ResponseSecurityTokenHandler.GetSaml2SecurityTokenHandler();
         }
 
@@ -90,7 +109,7 @@ namespace ITfoxtec.Saml2
 
         private XmlNode GetAssertionElement()
         {
-            var assertionElements = XmlDocument.DocumentElement.SelectNodes(string.Format("//*[local-name()='{0}']", Saml2Constants.Message.Assertion)); 
+            var assertionElements = XmlDocument.DocumentElement.SelectNodes(string.Format("//*[local-name()='{0}']", Saml2Constants.Message.Assertion));
             if (assertionElements.Count != 1)
             {
                 throw new Saml2ResponseException("There is not exactly one Assertion element.");
@@ -101,23 +120,23 @@ namespace ITfoxtec.Saml2
         private void ValidateAssertionExpiration(XmlNode assertionElement)
         {
             var subjectElement = assertionElement[Saml2Constants.Message.Subject, Saml2Constants.AssertionNamespace.OriginalString];
-            if(subjectElement == null)
+            if (subjectElement == null)
             {
                 throw new Saml2ResponseException("Subject Not Found.");
             }
             var subjectConfirmationElement = subjectElement[Saml2Constants.Message.SubjectConfirmation, Saml2Constants.AssertionNamespace.OriginalString];
-            if(subjectConfirmationElement == null)
+            if (subjectConfirmationElement == null)
             {
                 throw new Saml2ResponseException("SubjectConfirmationElement Not Found.");
             }
             var subjectConfirmationData = subjectConfirmationElement[Saml2Constants.Message.SubjectConfirmationData, Saml2Constants.AssertionNamespace.OriginalString];
-            if(subjectConfirmationData == null)
+            if (subjectConfirmationData == null)
             {
                 throw new Saml2ResponseException("SubjectConfirmationData Not Found.");
             }
 
             var notOnOrAfter = DateTime.Parse(subjectConfirmationData.Attributes[Saml2Constants.Message.NotOnOrAfter].GetValueOrNull(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-            if(notOnOrAfter < DateTime.UtcNow)
+            if (notOnOrAfter < DateTime.UtcNow)
             {
                 throw new Saml2ResponseException(string.Format("Assertion has expired. Assertion valid NotOnOrAfter {0}.", notOnOrAfter));
             }
@@ -138,9 +157,21 @@ namespace ITfoxtec.Saml2
 
         protected override void DecryptMessage()
         {
-            if(DecryptionCertificate != null)
+            if (DecryptionCertificate != null)
             {
-                new Saml2EncryptedXml(XmlDocument, DecryptionCertificate.PrivateKey as RSA).DecryptDocument();
+                if (DecryptionCertificate.HasCngKey())
+                {
+                    CngKey key = DecryptionCertificate.GetCngPrivateKey();
+                    using (RSACng rsa = new RSACng(key))
+                    {
+                        new Saml2EncryptedXml(XmlDocument, rsa).DecryptDocument();
+                    }
+                }
+                else
+                {
+                    new Saml2EncryptedXml(XmlDocument, DecryptionCertificate.PrivateKey as RSA).DecryptDocument();
+                }
+
 #if DEBUG
                 Debug.WriteLine("Saml2P (Decrypted): " + XmlDocument.OuterXml);
 #endif

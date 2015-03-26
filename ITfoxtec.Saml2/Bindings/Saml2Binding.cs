@@ -4,11 +4,13 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using System.Xml;
+using Security.Cryptography;
+using Security.Cryptography.X509Certificates;
 
 namespace ITfoxtec.Saml2.Bindings
 {
     public abstract class Saml2Binding
-    {        
+    {
         public XmlDocument XmlDocument { get; protected set; }
 
         /// <summary>
@@ -28,13 +30,30 @@ namespace ITfoxtec.Saml2.Bindings
 
             if (signingCertificate != null)
             {
-                if (signingCertificate.PrivateKey == null)
+                if (signingCertificate.HasCngKey())
                 {
-                    throw new ArgumentException("No Private Key present in Signing Certificate or missing private key read credentials.");
+                    CngKey privateKey = signingCertificate.GetCngPrivateKey();
+                    if (privateKey == null)
+                    {
+                        throw new ArgumentException("No Private Key present in Signing Certificate or missing private key read credentials.");
+                    }
+
+                    if (privateKey.Algorithm.Algorithm != "RSA")
+                    {
+                        throw new ArgumentException("The Private Key present in Signing Certificate must be RSA.");
+                    }
                 }
-                if (!(signingCertificate.PrivateKey is DSA || signingCertificate.PrivateKey is RSACryptoServiceProvider))
+                else
                 {
-                    throw new ArgumentException("The Private Key present in Signing Certificate must be either DSA or RSACryptoServiceProvider.");
+                    if (signingCertificate.PrivateKey == null)
+                    {
+                        throw new ArgumentException("No Private Key present in Signing Certificate or missing private key read credentials.");
+                    }
+
+                    if (!(signingCertificate.PrivateKey is DSA || signingCertificate.PrivateKey is RSACryptoServiceProvider))
+                    {
+                        throw new ArgumentException("The Private Key present in Signing Certificate must be either DSA or RSACryptoServiceProvider.");
+                    }
                 }
             }
 

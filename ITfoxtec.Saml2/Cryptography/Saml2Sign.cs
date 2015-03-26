@@ -1,5 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using System.Text;
+using Security.Cryptography;
 
 namespace ITfoxtec.Saml2.Cryptography
 {
@@ -14,14 +16,25 @@ namespace ITfoxtec.Saml2.Cryptography
 
         public byte[] SignData(byte[] data)
         {
-            if (Algorithm is RSACryptoServiceProvider)
+            RSACryptoServiceProvider rsaCryptoServiceProvider = Algorithm as RSACryptoServiceProvider;
+            if (rsaCryptoServiceProvider != null)
             {
-                return (Algorithm as RSACryptoServiceProvider).SignData(data, new SHA1CryptoServiceProvider());
+                return rsaCryptoServiceProvider.SignData(data, new SHA1CryptoServiceProvider());
             }
-            else
+
+            DSACryptoServiceProvider dsaCryptoServiceProvider = Algorithm as DSACryptoServiceProvider;
+            if (dsaCryptoServiceProvider != null)
             {
-                return (Algorithm as DSACryptoServiceProvider).SignData(data);
+                return dsaCryptoServiceProvider.SignData(data);
             }
+
+            RSACng rsaCng = Algorithm as RSACng;
+            if (rsaCng != null)
+            {
+                return rsaCng.SignData(data);
+            }
+
+            throw new NotSupportedException("The given AsymmetricAlgorithm is not supported.");
         }
 
         internal bool CheckSignature(string signedData, byte[] signatureValue)
@@ -35,7 +48,7 @@ namespace ITfoxtec.Saml2.Cryptography
             else
             {
                 return (Algorithm as DSA).VerifySignature(hash, signatureValue);
-            }   
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Security.Cryptography;
 
 namespace ITfoxtec.Saml2.Cryptography
 {
@@ -34,7 +35,37 @@ namespace ITfoxtec.Saml2.Cryptography
 
         public override byte[] DecryptEncryptedKey(EncryptedKey encryptedKey)
         {
-            return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, DecryptionPrivateKey, (encryptedKey.EncryptionMethod != null) && (encryptedKey.EncryptionMethod.KeyAlgorithm == EncryptedXml.XmlEncRSAOAEPUrl));
+            RSACng rsaCng = DecryptionPrivateKey as RSACng;
+            if (rsaCng != null)
+            {
+                byte[] keyData = encryptedKey.CipherData.CipherValue;
+                if (keyData == null)
+                {
+                    throw new ArgumentNullException("encryptedKey");
+                }
+
+                if (DecryptionPrivateKey == null)
+                {
+                    throw new InvalidOperationException("DecryptionPrivateKey is null.");
+                }
+
+                AsymmetricPaddingMode paddingMode;
+                if (encryptedKey.EncryptionMethod != null &&
+                    encryptedKey.EncryptionMethod.KeyAlgorithm == EncryptedXml.XmlEncRSAOAEPUrl)
+                {
+                    paddingMode = AsymmetricPaddingMode.Oaep;
+                }
+                else
+                {
+                    paddingMode = AsymmetricPaddingMode.Pkcs1;
+                }
+
+                rsaCng.EncryptionPaddingMode = paddingMode;
+                rsaCng.EncryptionHashAlgorithm = CngAlgorithm.Sha1;
+                return rsaCng.DecryptValue(keyData);
+            }
+
+            return EncryptedXml.DecryptKey(encryptedKey.CipherData.CipherValue, this.DecryptionPrivateKey, (encryptedKey.EncryptionMethod != null) && (encryptedKey.EncryptionMethod.KeyAlgorithm == EncryptedXml.XmlEncRSAOAEPUrl));
         }
 
     }
