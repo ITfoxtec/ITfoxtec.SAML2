@@ -23,24 +23,46 @@ namespace ITfoxtec.Saml2.Bindings
         public string Signature { get; protected set; }
         public string SignatureAlgorithm { get; protected set; }
 
-        public Saml2RedirectBinding Bind(Saml2Request saml2Request, X509Certificate2 signingCertificate = null)
+        /// <summary>
+        ///   Computes the RedirectLocation and Signature for the request.
+        /// </summary>
+        /// <param name="saml2Request">The SAML2 request.</param>
+        /// <param name="signingCertificate">Certificate to sign the request.</param>
+        /// <param name="signatureAlgorithm">
+        ///   Algorithm to sign the request.
+        ///   <example>http://www.w3.org/2000/09/xmldsig#rsa-sha1</example>
+        ///   <example>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</example>
+        /// </param>
+        /// <returns></returns>
+        public Saml2RedirectBinding Bind(Saml2Request saml2Request, X509Certificate2 signingCertificate = null, string signatureAlgorithm = null)
         {
-            return BindInternal(saml2Request, Saml2Constants.Message.SamlRequest, signingCertificate);
+            return BindInternal(saml2Request, Saml2Constants.Message.SamlRequest, signingCertificate, signatureAlgorithm);
         }
 
-        public Saml2RedirectBinding Bind(Saml2Response saml2Response, X509Certificate2 signingCertificate = null)
+        /// <summary>
+        ///   Computes the RedirectLocation and Signature for the response.
+        /// </summary>
+        /// <param name="saml2Response">The SAML2 response.</param>
+        /// <param name="signingCertificate">Certificate to sign the response.</param>
+        /// <param name="signatureAlgorithm">
+        ///   Algorithm to sign the response.
+        ///   <example>http://www.w3.org/2000/09/xmldsig#rsa-sha1</example>
+        ///   <example>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</example>
+        /// </param>
+        /// <returns></returns>
+        public Saml2RedirectBinding Bind(Saml2Response saml2Response, X509Certificate2 signingCertificate = null, string signatureAlgorithm = null)
         {
-            return BindInternal(saml2Response as Saml2Request, Saml2Constants.Message.SamlResponse, signingCertificate);
+            return BindInternal(saml2Response as Saml2Request, Saml2Constants.Message.SamlResponse, signingCertificate, signatureAlgorithm);
         }
 
-        protected Saml2RedirectBinding BindInternal(Saml2Request saml2RequestResponse, string messageName, X509Certificate2 signingCertificate)
+        protected Saml2RedirectBinding BindInternal(Saml2Request saml2RequestResponse, string messageName, X509Certificate2 signingCertificate, string signatureAlgorithm = null)
         {
             base.BindInternal(saml2RequestResponse, signingCertificate);
 
-            var requestQueryString = string.Join("&", RequestQueryString(signingCertificate, messageName));
+            var requestQueryString = string.Join("&", RequestQueryString(signingCertificate, messageName, signatureAlgorithm));
             if (signingCertificate != null)
             {
-                requestQueryString = SigneQueryString(requestQueryString, signingCertificate);
+                requestQueryString = this.SignQueryString(requestQueryString, signingCertificate, signatureAlgorithm);
             }
 
             RedirectLocation = new Uri(string.Join("?", saml2RequestResponse.Destination.Uri.OriginalString, requestQueryString));
@@ -48,30 +70,48 @@ namespace ITfoxtec.Saml2.Bindings
             return this;
         }
 
-        private string SigneQueryString(string queryString, X509Certificate2 signingCertificate)
+        private string SignQueryString(string queryString, X509Certificate2 signingCertificate, string signatureAlgorithm = null)
         {
             if (signingCertificate.HasCngKey())
             {
                 CngKey key = signingCertificate.GetCngPrivateKey();
                 using (RSACng rsa = new RSACng(key))
                 {
-                    rsa.SignatureHashAlgorithm = CngAlgorithm.Sha1;
+                    if (signatureAlgorithm == null)
+                    {
+                        signatureAlgorithm = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                    }
+
+                    switch (signatureAlgorithm)
+                    {
+                        case "http://www.w3.org/2000/09/xmldsig#rsa-sha1":
+                            rsa.SignatureHashAlgorithm = CngAlgorithm.Sha1;
+                            break;
+
+                        case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256":
+                            rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
+                            break;
+
+                        default:
+                            throw new NotSupportedException("Only SHA1 and SHA256 is supported.");
+                    }
+
                     Saml2Sign saml2Signed = new Saml2Sign(rsa);
-                    SignatureAlgorithm = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                    SignatureAlgorithm = signatureAlgorithm;
                     Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
                 }
             }
             else
             {
                 Saml2Sign saml2Signed = new Saml2Sign(signingCertificate.PrivateKey);
-                SignatureAlgorithm = signingCertificate.PrivateKey.SignatureAlgorithm;
+                SignatureAlgorithm = signatureAlgorithm ?? signingCertificate.PrivateKey.SignatureAlgorithm;
                 Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
             }
 
             return string.Join("&", queryString, string.Join("=", Saml2Constants.Message.Signature, HttpUtility.UrlEncode(Signature)));
         }
 
-        private IEnumerable<string> RequestQueryString(X509Certificate2 signingCertificate, string messageName)
+        private IEnumerable<string> RequestQueryString(X509Certificate2 signingCertificate, string messageName, string signatureAlgorithm)
         {
             yield return string.Join("=", messageName, HttpUtility.UrlEncode(CompressRequest()));
 
@@ -86,7 +126,8 @@ namespace ITfoxtec.Saml2.Bindings
                 {
                     if (signingCertificate.GetCngPrivateKey().Algorithm.Algorithm == "RSA")
                     {
-                        yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode("http://www.w3.org/2000/09/xmldsig#rsa-sha1"));
+                        signatureAlgorithm = signatureAlgorithm ?? "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                        yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signatureAlgorithm));
                     }
                 }
                 else
