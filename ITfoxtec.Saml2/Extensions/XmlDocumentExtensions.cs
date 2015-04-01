@@ -18,15 +18,17 @@ namespace ITfoxtec.Saml2
         /// <param name="certificate">The certificate used to sign the document</param>
         /// <param name="includeOption">Certificate include option</param>
         /// <param name="id">The is of the topmost element in the xmldocument</param>
-        internal static XmlDocument SignDocument(this XmlDocument xmlDocument, X509Certificate2 certificate, X509IncludeOption includeOption, string id)
+        /// <param name="signatureMethod">Signature method</param>
+        /// <param name="digestMethod">Digest method</param>
+        internal static XmlDocument SignDocument(this XmlDocument xmlDocument, X509Certificate2 certificate, X509IncludeOption includeOption, string id, string signatureMethod, string digestMethod)
         {
             if (certificate == null)
             {
                 throw new ArgumentNullException("certificate");
             }
- 
+
             var signedXml = new Saml2SignedXml(xmlDocument);
-            signedXml.ComputeSignature(certificate, includeOption, id);
+            signedXml.ComputeSignature(certificate, includeOption, id, signatureMethod, digestMethod);
 
             var issuer = xmlDocument.DocumentElement[Saml2Constants.Message.Issuer, Saml2Constants.AssertionNamespace.OriginalString];
             xmlDocument.DocumentElement.InsertAfter(xmlDocument.ImportNode(signedXml.GetXml(), true), issuer);

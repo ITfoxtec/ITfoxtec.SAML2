@@ -27,6 +27,8 @@ namespace ITfoxtec.Saml2.Schemas.Metadata
             Id = new Saml2Id();
             MetadataSigningCertificate = metadataSigningCertificate;
             CertificateIncludeOption = X509IncludeOption.EndCertOnly;
+            this.SignatureMethod = SecurityAlgorithms.RsaSha1Signature;
+            this.DigestMethod = SecurityAlgorithms.Sha1Digest;
         }
 
         /// <summary>
@@ -53,6 +55,18 @@ namespace ITfoxtec.Saml2.Schemas.Metadata
 
         /// <summary>
         /// [Optional]
+        /// Default http://www.w3.org/2000/09/xmldsig#rsa-sha1.
+        /// </summary>
+        public string SignatureMethod { get; set; }
+
+        /// <summary>
+        /// [Optional]
+        /// Default http://www.w3.org/2000/09/xmldsig#sha1.
+        /// </summary>
+        public string DigestMethod { get; set; }
+
+        /// <summary>
+        /// [Optional]
         /// Optional attribute indicates the expiration time of the metadata contained in the element and any contained elements.
         /// 
         /// Metadata is valid until in days from now.
@@ -64,7 +78,7 @@ namespace ITfoxtec.Saml2.Schemas.Metadata
         /// The SPSSODescriptor element extends SSODescriptorType with content reflecting profiles specific
         /// to service providers. 
         /// </summary>
-        public SPSsoDescriptor SPSsoDescriptor  { get; set; }
+        public SPSsoDescriptor SPSsoDescriptor { get; set; }
 
         /// <summary>
         /// [Optional]
@@ -78,10 +92,11 @@ namespace ITfoxtec.Saml2.Schemas.Metadata
 
             envelope.Add(GetXContent());
             var xmlDocument = envelope.ToXmlDocument();
-            if(MetadataSigningCertificate != null)
+            if (MetadataSigningCertificate != null)
             {
-                xmlDocument.SignDocument(MetadataSigningCertificate, CertificateIncludeOption, Id.Value);
+                xmlDocument.SignDocument(MetadataSigningCertificate, CertificateIncludeOption, Id.Value, this.SignatureMethod, this.DigestMethod);
             }
+
             return xmlDocument;
         }
 

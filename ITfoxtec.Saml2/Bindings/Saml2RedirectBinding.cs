@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -79,16 +80,16 @@ namespace ITfoxtec.Saml2.Bindings
                 {
                     if (signatureAlgorithm == null)
                     {
-                        signatureAlgorithm = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                        signatureAlgorithm = SecurityAlgorithms.RsaSha1Signature;
                     }
 
                     switch (signatureAlgorithm)
                     {
-                        case "http://www.w3.org/2000/09/xmldsig#rsa-sha1":
+                        case SecurityAlgorithms.RsaSha1Signature:
                             rsa.SignatureHashAlgorithm = CngAlgorithm.Sha1;
                             break;
 
-                        case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256":
+                        case SecurityAlgorithms.RsaSha256Signature:
                             rsa.SignatureHashAlgorithm = CngAlgorithm.Sha256;
                             break;
 
@@ -126,7 +127,7 @@ namespace ITfoxtec.Saml2.Bindings
                 {
                     if (signingCertificate.GetCngPrivateKey().Algorithm.Algorithm == "RSA")
                     {
-                        signatureAlgorithm = signatureAlgorithm ?? "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+                        signatureAlgorithm = signatureAlgorithm ?? SecurityAlgorithms.RsaSha1Signature;
                         yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signatureAlgorithm));
                     }
                 }

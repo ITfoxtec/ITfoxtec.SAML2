@@ -1,14 +1,14 @@
-﻿using System;
-using System.Security.Cryptography;
-
-namespace ITfoxtec.Saml2.Cryptography
+﻿namespace ITfoxtec.Saml2.Cryptography
 {
-    public sealed class RSAPKCS1SHA256SignatureDescription : SignatureDescription
+    using System;
+    using System.Security.Cryptography;
+
+    public sealed class RSAPKCS1SHA1SignatureDescription : SignatureDescription
     {
-        public RSAPKCS1SHA256SignatureDescription()
+        public RSAPKCS1SHA1SignatureDescription()
         {
             base.KeyAlgorithm = typeof(RSACryptoServiceProvider).FullName;
-            base.DigestAlgorithm = typeof(SHA256Managed).FullName;
+            base.DigestAlgorithm = typeof(SHA1Managed).FullName;
             base.FormatterAlgorithm = typeof(RSAPKCS1SignatureFormatter).FullName;
             base.DeformatterAlgorithm = typeof(RSAPKCS1SignatureDeformatter).FullName;
         }
@@ -21,7 +21,7 @@ namespace ITfoxtec.Saml2.Cryptography
             }
 
             RSAPKCS1SignatureDeformatter deformatter = new RSAPKCS1SignatureDeformatter(key);
-            deformatter.SetHashAlgorithm("SHA256");
+            deformatter.SetHashAlgorithm("SHA1");
             return deformatter;
         }
 
@@ -33,7 +33,7 @@ namespace ITfoxtec.Saml2.Cryptography
             }
 
             RSAPKCS1SignatureFormatter formatter = new CngRSAPKCS1SignatureFormatter(key);
-            formatter.SetHashAlgorithm("SHA256");
+            formatter.SetHashAlgorithm("SHA1");
             return formatter;
         }
 

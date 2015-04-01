@@ -66,6 +66,8 @@
     <Compile Include="Bindings\Saml2PostBinding.cs" />
     <Compile Include="Bindings\Saml2RedirectBinding.cs" />
     <Compile Include="Claims\Saml2ClaimTypes.cs" />
+    <Compile Include="Cryptography\CngRSAPKCS1SignatureFormatter.cs" />
+    <Compile Include="Cryptography\RSAPKCS1SHA1SignatureDescription.cs" />
     <Compile Include="Cryptography\RSAPKCS1SHA256SignatureDescription.cs" />
     <Compile Include="Cryptography\Saml2EncryptedXml.cs" />
     <Compile Include="Cryptography\Saml2Sign.cs" />

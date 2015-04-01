@@ -8,6 +8,7 @@ using System.Web.Routing;
 
 namespace WebAppTest
 {
+    using System.IdentityModel.Tokens;
     using System.Security.Cryptography;
     using ITfoxtec.Saml2.Cryptography;
 
@@ -21,10 +22,15 @@ namespace WebAppTest
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            // Enable SHA-256 XML signature support.
+            // Enable SHA-1 XML CNG signature support.
+            CryptoConfig.AddAlgorithm(
+                typeof(RSAPKCS1SHA1SignatureDescription),
+                SecurityAlgorithms.RsaSha1Signature);
+
+            // Enable SHA-256 XML CNG signature support.
             CryptoConfig.AddAlgorithm(
                 typeof(RSAPKCS1SHA256SignatureDescription),
-                "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256");
+                SecurityAlgorithms.RsaSha256Signature);
         }
     }
 }

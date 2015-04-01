@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -28,23 +29,23 @@ namespace ITfoxtec.Saml2.Bindings
             CertificateIncludeOption = X509IncludeOption.EndCertOnly;
         }
 
-        public Saml2PostBinding Bind(Saml2Request saml2Request, X509Certificate2 signingCertificate = null)
+        public Saml2PostBinding Bind(Saml2Request saml2Request, X509Certificate2 signingCertificate = null, string signatureMethod = SecurityAlgorithms.RsaSha1Signature, string digestMethod = SecurityAlgorithms.Sha1Digest)
         {
-            return BindInternal(saml2Request, Saml2Constants.Message.SamlRequest, signingCertificate);
+            return BindInternal(saml2Request, Saml2Constants.Message.SamlRequest, signingCertificate, signatureMethod, digestMethod);
         }
 
-        public Saml2PostBinding Bind(Saml2Response saml2Response, X509Certificate2 signingCertificate = null)
+        public Saml2PostBinding Bind(Saml2Response saml2Response, X509Certificate2 signingCertificate = null, string signatureMethod = SecurityAlgorithms.RsaSha1Signature, string digestMethod = SecurityAlgorithms.Sha1Digest)
         {
-            return BindInternal(saml2Response as Saml2Request, Saml2Constants.Message.SamlResponse, signingCertificate);
+            return BindInternal(saml2Response as Saml2Request, Saml2Constants.Message.SamlResponse, signingCertificate, signatureMethod, digestMethod);
         }
 
-        protected Saml2PostBinding BindInternal(Saml2Request saml2RequestResponse, string messageName, X509Certificate2 signingCertificate)
+        protected Saml2PostBinding BindInternal(Saml2Request saml2RequestResponse, string messageName, X509Certificate2 signingCertificate, string signatureMethod, string digestMethod)
         {
             base.BindInternal(saml2RequestResponse, signingCertificate);
 
             if (signingCertificate != null)
             {
-                XmlDocument = XmlDocument.SignDocument(signingCertificate, CertificateIncludeOption, saml2RequestResponse.Id.Value);
+                XmlDocument = XmlDocument.SignDocument(signingCertificate, CertificateIncludeOption, saml2RequestResponse.Id.Value, signatureMethod, digestMethod);
             }
 
             PostContent = string.Concat(HtmlPostPage(saml2RequestResponse.Destination, messageName));
@@ -75,7 +76,7 @@ namespace ITfoxtec.Saml2.Bindings
             yield return string.Format(
 @"<input type=""hidden"" name=""{0}"" value=""{1}""/>", messageName, Convert.ToBase64String(Encoding.UTF8.GetBytes(XmlDocument.OuterXml)));
 
-            if(!string.IsNullOrWhiteSpace(RelayState))
+            if (!string.IsNullOrWhiteSpace(RelayState))
             {
                 yield return string.Format(
 @"<input type=""hidden"" name=""{0}"" value=""{1}""/>", Saml2Constants.Message.RelayState, RelayState);
