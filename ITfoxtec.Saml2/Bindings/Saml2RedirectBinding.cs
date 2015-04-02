@@ -184,7 +184,8 @@ namespace ITfoxtec.Saml2.Bindings
             }
 
             SignatureAlgorithm = request.QueryString[Saml2Constants.Message.SigAlg];
-            ValidateQueryStringSignature(request.Url.Query, messageName, Convert.FromBase64String(request.QueryString[Saml2Constants.Message.Signature]), signatureValidationCertificate);
+            Signature = request.QueryString[Saml2Constants.Message.Signature];
+            ValidateQueryStringSignature(request.Url.Query, messageName, Convert.FromBase64String(Signature), signatureValidationCertificate);
             saml2RequestResponse.Read(DecompressResponse(request.QueryString[messageName]));
             XmlDocument = saml2RequestResponse.XmlDocument;
             return saml2RequestResponse;
@@ -193,9 +194,7 @@ namespace ITfoxtec.Saml2.Bindings
         private void ValidateQueryStringSignature(string queryString, string messageName, byte[] signatureValue, X509Certificate2 signatureValidationCertificate)
         {
             var saml2Sign = new Saml2Sign(signatureValidationCertificate.PublicKey.Key);
-            Signature = Encoding.UTF8.GetString(signatureValue);
-
-            if (!saml2Sign.CheckSignature(new RawSaml2QueryString(queryString, messageName).SignedQueryString, signatureValue))
+            if (!saml2Sign.CheckSignature(new RawSaml2QueryString(queryString, messageName).SignedQueryString, signatureValue, SignatureAlgorithm))
             {
                 throw new Saml2ResponseException("Signature is invalid (SHA256 algorithm is not supported).");
             }

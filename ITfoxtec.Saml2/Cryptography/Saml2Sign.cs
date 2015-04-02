@@ -37,18 +37,25 @@ namespace ITfoxtec.Saml2.Cryptography
             throw new NotSupportedException("The given AsymmetricAlgorithm is not supported.");
         }
 
-        internal bool CheckSignature(string signedData, byte[] signatureValue)
+        internal bool CheckSignature(string signedData, byte[] signatureValue, string signatureAlgorithm)
         {
-            byte[] hash = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(signedData));
+            SignatureDescription signatureDescription = (SignatureDescription)CryptoConfig.CreateFromName(signatureAlgorithm);
+            HashAlgorithm hashAlgorithm = signatureDescription.CreateDigest();
+            byte[] hash = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(signedData));
 
-            if (Algorithm is RSACryptoServiceProvider)
+            RSACryptoServiceProvider rsa = Algorithm as RSACryptoServiceProvider;
+            if (rsa != null)
             {
-                return (Algorithm as RSACryptoServiceProvider).VerifyHash(hash, "SHA1", signatureValue);
+                return rsa.VerifyHash(hash, signatureDescription.DigestAlgorithm, signatureValue);
             }
-            else
+
+            DSA dsa = Algorithm as DSA;
+            if (dsa != null)
             {
-                return (Algorithm as DSA).VerifySignature(hash, signatureValue);
+                return dsa.VerifySignature(hash, signatureValue);
             }
+
+            throw new NotSupportedException("Only RSA and DSA are supported");
         }
     }
 }
