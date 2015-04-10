@@ -51,6 +51,8 @@ namespace ITfoxtec.Saml2.Schemas
 
             public const string Assertion = "Assertion";
 
+            public const string EncryptedAssertion = "EncryptedAssertion";
+
             public const string Protocol = "Protocol";
 
             public const string AuthnRequest = "AuthnRequest";

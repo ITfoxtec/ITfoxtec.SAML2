@@ -45,7 +45,7 @@ namespace ITfoxtec.Saml2.Bindings
 
             if (signingCertificate != null)
             {
-                XmlDocument = XmlDocument.SignDocument(signingCertificate, CertificateIncludeOption, saml2RequestResponse.Id.Value, signatureMethod, digestMethod);
+                XmlDocument = XmlDocument.SignDocument(signingCertificate, CertificateIncludeOption, saml2RequestResponse.Id.Value, signatureMethod, digestMethod, saml2RequestResponse.ToUnencryptedXml());
             }
 
             PostContent = string.Concat(HtmlPostPage(saml2RequestResponse.Destination, messageName));

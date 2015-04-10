@@ -107,6 +107,10 @@ namespace ITfoxtec.Saml2
 
         public abstract XmlDocument ToXml();
 
+        public virtual XmlDocument ToUnencryptedXml()
+        {
+            return ToXml();
+        }
 
         private static System.Security.Cryptography.SymmetricAlgorithm GetKeyInstance(string algorithm)
         {
@@ -141,7 +145,7 @@ namespace ITfoxtec.Saml2
 #if DEBUG
             Debug.WriteLine("Saml2P: " + xml);
 #endif
-            
+
             XmlDocument = xml.ToXmlDocument();
 
             if (XmlDocument.DocumentElement.NamespaceURI != Saml2Constants.ProtocolNamespace.OriginalString)
