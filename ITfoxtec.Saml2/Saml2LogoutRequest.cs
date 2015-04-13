@@ -29,7 +29,7 @@ namespace ITfoxtec.Saml2
         /// [Optional]
         /// An indication of the reason for the logout, in the form of a URI reference.
         /// </summary>
-        public Uri Reason { get; set; }        
+        public Uri Reason { get; set; }
 
         /// <summary>
         /// [Required]
@@ -54,7 +54,25 @@ namespace ITfoxtec.Saml2
             {
                 NameId = new Saml2NameIdentifier(ReadClaimValue(identity, Saml2ClaimTypes.NameId), new Uri(ReadClaimValue(identity, Saml2ClaimTypes.NameIdFormat)));
                 SessionIndex = ReadClaimValue(identity, Saml2ClaimTypes.SessionIndex);
-            }           
+            }
+        }
+
+        internal override void Read(string xml, bool validateXmlSignature = false)
+        {
+            base.Read(xml, validateXmlSignature);
+            XmlAttribute notOnOrAfterAttribute = XmlDocument.DocumentElement.Attributes[Saml2Constants.Message.NotOnOrAfter];
+            if (notOnOrAfterAttribute != null)
+            {
+                DateTime notOnOrAfter;
+                this.NotOnOrAfter = DateTime.TryParse(notOnOrAfterAttribute.Value, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out notOnOrAfter) ?
+                    (DateTime?)notOnOrAfter :
+                    null;
+
+                if (this.NotOnOrAfter != null && this.NotOnOrAfter.Value < DateTime.UtcNow)
+                {
+                    throw new Saml2ResponseException(string.Format("Logout request has expired. Logout request valid NotOnOrAfter {0}.", notOnOrAfter));
+                }
+            }
         }
 
         private static string ReadClaimValue(ClaimsIdentity identity, string claimType)
