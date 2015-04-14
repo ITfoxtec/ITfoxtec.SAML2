@@ -57,11 +57,11 @@ namespace ITfoxtec.Saml2.Bindings
             yield return string.Format(
 @"<!DOCTYPE html>
 <html lang=""en"">
-<html>
 <head>
     <meta charset=""utf-8"" />
     <meta http-equiv=""X-UA-Compatible"" content=""IE=edge"">
-    <title>Home Page - My ASP.NET Application</title>
+    <meta name=""viewport"" content=""initial-scale=1.0, width=device-width"" />
+    <title>Single sign on</title>
 </head>
 <body onload=""document.forms[0].submit()"">
     <noscript>
