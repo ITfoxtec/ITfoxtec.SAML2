@@ -57,6 +57,18 @@ namespace ITfoxtec.Saml2
             }
         }
 
+        /// <summary>
+        ///   For use by identity provider to construct an identity provider initiated logout request.
+        /// </summary>
+        /// <param name="nameId">The identifier that specify the principal.</param>
+        /// <param name="sessionIndex">The identifier that indexes this session at the message recipient.</param>
+        public Saml2LogoutRequest(Saml2NameIdentifier nameId, string sessionIndex)
+        {
+            NotOnOrAfter = DateTime.UtcNow.AddMinutes(10);
+            NameId = nameId;
+            SessionIndex = sessionIndex;
+        }
+
         internal override void Read(string xml, bool validateXmlSignature = false)
         {
             base.Read(xml, validateXmlSignature);
