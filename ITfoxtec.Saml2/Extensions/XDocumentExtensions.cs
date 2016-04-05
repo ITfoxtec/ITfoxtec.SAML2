@@ -18,6 +18,7 @@ namespace ITfoxtec.Saml2
             xmlDocument.PreserveWhitespace = true;
             using (var reader = xDocument.CreateReader())
             {
+                reader.Settings.XmlResolver = null;
                 xmlDocument.Load(reader);
             }
             return xmlDocument;
