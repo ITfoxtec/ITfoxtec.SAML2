@@ -54,6 +54,8 @@ namespace ITfoxtec.Saml2
         public override XmlDocument ToXml()
         {
             XmlDocument = new XmlDocument();
+            XmlDocument.XmlResolver = null;
+            XmlDocument.PreserveWhitespace = true;
             using (XmlWriter xmlWriter = XmlDocument.CreateNavigator().AppendChild())
             {
                 xmlWriter.WriteStartElement(elementName, Saml2Constants.ProtocolNamespace.OriginalString);

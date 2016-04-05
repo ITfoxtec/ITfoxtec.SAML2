@@ -14,6 +14,7 @@ namespace ITfoxtec.Saml2
         internal static XmlDocument ToXmlDocument(this XDocument xDocument)
         {
             XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.XmlResolver = null;
             xmlDocument.PreserveWhitespace = true;
             using (var reader = xDocument.CreateReader())
             {
