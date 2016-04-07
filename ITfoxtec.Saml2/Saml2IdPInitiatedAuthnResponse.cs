@@ -54,6 +54,8 @@
         public override XmlDocument ToXml()
         {
             XmlDocument = new XmlDocument();
+            XmlDocument.XmlResolver = null;
+            XmlDocument.PreserveWhitespace = true;
             using (XmlWriter xmlWriter = XmlDocument.CreateNavigator().AppendChild())
             {
                 this.WriteXmlBeforeAssertion(xmlWriter);

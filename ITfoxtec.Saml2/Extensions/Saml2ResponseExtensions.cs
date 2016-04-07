@@ -35,7 +35,9 @@ namespace ITfoxtec.Saml2
             }
 
             var transformedPrincipal = FederatedAuthentication.FederationConfiguration.IdentityConfiguration.ClaimsAuthenticationManager.Authenticate(null, principal);
-            var sessionSecurityToken = lifetime.HasValue ? new SessionSecurityToken(transformedPrincipal, lifetime.Value) : new SessionSecurityToken(transformedPrincipal);
+            var sessionSecurityToken = lifetime.HasValue ?
+                new SessionSecurityToken(transformedPrincipal, lifetime.Value) :
+                new SessionSecurityToken(transformedPrincipal, null, saml2AuthnResponse.Saml2SecurityToken.ValidFrom, saml2AuthnResponse.Saml2SecurityToken.ValidTo);
             sessionSecurityToken.IsReferenceMode = isReferenceMode;
             sessionSecurityToken.IsPersistent = isPersistent;
             FederatedAuthentication.SessionAuthenticationModule.AuthenticateSessionSecurityToken(sessionSecurityToken, true);
