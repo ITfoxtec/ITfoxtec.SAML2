@@ -15,6 +15,7 @@ namespace ITfoxtec.Saml2
             xmlDocument.PreserveWhitespace = true;
             using (var reader = xElement.CreateReader())
             {
+                reader.Settings.DtdProcessing = DtdProcessing.Prohibit;
                 reader.Settings.XmlResolver = null;
                 xmlDocument.Load(reader);
             }
