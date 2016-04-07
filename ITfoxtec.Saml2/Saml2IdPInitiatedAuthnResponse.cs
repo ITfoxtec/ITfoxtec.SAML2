@@ -89,6 +89,8 @@
                 Saml2SecurityToken tokenWithoutEncryption = new Saml2SecurityToken(copiedAssertion);
 
                 XmlDocument document = new XmlDocument();
+                document.XmlResolver = null;
+                document.PreserveWhitespace = true;
                 using (XmlWriter xmlWriter = document.CreateNavigator().AppendChild())
                 {
                     this.WriteXmlBeforeAssertion(xmlWriter);
