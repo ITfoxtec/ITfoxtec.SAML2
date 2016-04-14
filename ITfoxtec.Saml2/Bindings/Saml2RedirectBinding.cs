@@ -63,7 +63,7 @@ namespace ITfoxtec.Saml2.Bindings
             if (!string.IsNullOrWhiteSpace(RelayState))
             {
                 var relayState = HttpUtility.UrlEncode(RelayState);
-                if (relayState != null)
+                if (!string.IsNullOrWhiteSpace(relayState))
                 {
                    queryString.Add(Saml2Constants.Message.RelayState, relayState);
                 }
@@ -72,7 +72,7 @@ namespace ITfoxtec.Saml2.Bindings
             if(signingCertificate != null)
             {
                 var signatureAlgorithm = HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm);
-                if (signatureAlgorithm != null)
+                if (!string.IsNullOrWhiteSpace(signatureAlgorithm))
                 {
                    queryString.Add(Saml2Constants.Message.SigAlg, signatureAlgorithm);
                 }
