@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -33,20 +33,17 @@ namespace ITfoxtec.Saml2.Bindings
         {
             base.BindInternal(saml2RequestResponse, signingCertificate);
 
-            var requestQueryString = string.Join("&", RequestQueryString(signingCertificate, messageName));
+            var uriBuilder = new UriBuilder(saml2RequestResponse.Destination.Uri.OriginalString);
+            NameValueCollection queryString = HttpUtility.ParseQueryString(uriBuilder.Query);
+            queryString.Add(RequestQueryString(signingCertificate, messageName));
+
             if (signingCertificate != null)
             {
-                requestQueryString = SigneQueryString(requestQueryString, signingCertificate);
+               queryString.Add(Saml2Constants.Message.Signature, SigneQueryString(queryString.ToString(),signingCertificate));
             }
 
-            if (string.IsNullOrWhiteSpace(saml2RequestResponse.Destination.Uri.Query))
-            {
-               RedirectLocation = new Uri( saml2RequestResponse.Destination.Uri.OriginalString + "?" + requestQueryString);
-            }
-            else
-            {
-               RedirectLocation = new Uri(saml2RequestResponse.Destination.Uri.OriginalString + "?" + saml2RequestResponse.Destination.Uri.Query + "&" + requestQueryString);
-            }
+            uriBuilder.Query = queryString.ToString();
+            RedirectLocation = uriBuilder.Uri;
             return this;
         }
 
@@ -56,22 +53,36 @@ namespace ITfoxtec.Saml2.Bindings
             SignatureAlgorithm = signingCertificate.PrivateKey.SignatureAlgorithm;
             Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
 
-            return string.Join("&", queryString, string.Join("=", Saml2Constants.Message.Signature, HttpUtility.UrlEncode(Signature)));
+            return HttpUtility.UrlEncode(Signature);
         }
 
-        private IEnumerable<string> RequestQueryString(X509Certificate2 signingCertificate, string messageName)
+        private NameValueCollection RequestQueryString(X509Certificate2 signingCertificate, string messageName)
         {
-            yield return string.Join("=", messageName, HttpUtility.UrlEncode(CompressRequest()));
+            var queryString = new NameValueCollection();
+            var message = HttpUtility.UrlEncode(CompressRequest());
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+               queryString.Add(messageName, message);
+            }
 
             if (!string.IsNullOrWhiteSpace(RelayState))
             {
-                yield return string.Join("=", Saml2Constants.Message.RelayState, HttpUtility.UrlEncode(RelayState));
+                var relayState = HttpUtility.UrlEncode(RelayState);
+                if (relayState != null)
+                {
+                   queryString.Add(Saml2Constants.Message.RelayState, relayState);
+                }
             }
 
             if(signingCertificate != null)
             {
-                yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm));
+                var signatureAlgorithm = HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm);
+                if (signatureAlgorithm != null)
+                {
+                   queryString.Add(Saml2Constants.Message.SigAlg, signatureAlgorithm);
+                }
             }
+           return queryString;
         }
 
         private string CompressRequest()
