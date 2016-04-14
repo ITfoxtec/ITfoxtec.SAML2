@@ -36,13 +36,8 @@ namespace ITfoxtec.Saml2.Bindings
             var uriBuilder = new UriBuilder(saml2RequestResponse.Destination.Uri.OriginalString);
             NameValueCollection queryString = HttpUtility.ParseQueryString(uriBuilder.Query);
             queryString.Add(RequestQueryString(signingCertificate, messageName));
-
-            if (signingCertificate != null)
-            {
-               queryString.Add(Saml2Constants.Message.Signature, SigneQueryString(queryString.ToString(),signingCertificate));
-            }
-
             uriBuilder.Query = queryString.ToString();
+
             RedirectLocation = uriBuilder.Uri;
             return this;
         }
@@ -81,8 +76,10 @@ namespace ITfoxtec.Saml2.Bindings
                 {
                    queryString.Add(Saml2Constants.Message.SigAlg, signatureAlgorithm);
                 }
+
+                queryString.Add(Saml2Constants.Message.Signature, SigneQueryString(queryString.ToString(),signingCertificate));
             }
-           return queryString;
+            return queryString;
         }
 
         private string CompressRequest()
