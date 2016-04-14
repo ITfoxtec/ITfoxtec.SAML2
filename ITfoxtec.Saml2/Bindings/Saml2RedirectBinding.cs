@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Xml;
 using ITfoxtec.Saml2.Schemas;
 using ITfoxtec.Saml2.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -40,11 +39,17 @@ namespace ITfoxtec.Saml2.Bindings
                 requestQueryString = SigneQueryString(requestQueryString, signingCertificate);
             }
 
-            RedirectLocation = new Uri(string.Join("?", saml2RequestResponse.Destination.Uri.OriginalString, requestQueryString));
-
+            if (string.IsNullOrWhiteSpace(saml2RequestResponse.Destination.Uri.Query))
+            {
+               RedirectLocation = new Uri( saml2RequestResponse.Destination.Uri.OriginalString + "?" + requestQueryString);
+            }
+            else
+            {
+               RedirectLocation = new Uri(saml2RequestResponse.Destination.Uri.OriginalString + "?" + saml2RequestResponse.Destination.Uri.Query + "&" + requestQueryString);
+            }
             return this;
         }
-        
+
         private string SigneQueryString(string queryString, X509Certificate2 signingCertificate)
         {
             var saml2Signed = new Saml2Sign(signingCertificate.PrivateKey);
