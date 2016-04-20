@@ -55,11 +55,13 @@ namespace ITfoxtec.Saml2.Tokens
                 throw new InvalidDataException("The requered NameID Assertion is null");
             }
             identity.AddClaim(new Claim(Saml2ClaimTypes.NameId, saml2SecurityToken.Assertion.Subject.NameId.Value));
-            if (saml2SecurityToken.Assertion.Subject.NameId.Format == null)
+
+            var nameIdFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
+            if (saml2SecurityToken.Assertion.Subject.NameId.Format != null)
             {
-                throw new InvalidDataException("The requered NameID Assertion Format is null");
+                nameIdFormat = saml2SecurityToken.Assertion.Subject.NameId.Format.AbsoluteUri;
             }
-            identity.AddClaim(new Claim(Saml2ClaimTypes.NameIdFormat, saml2SecurityToken.Assertion.Subject.NameId.Format.AbsoluteUri));
+            identity.AddClaim(new Claim(Saml2ClaimTypes.NameIdFormat, nameIdFormat));
             identity.AddClaim(new Claim(Saml2ClaimTypes.SessionIndex, saml2SecurityToken.Id));
 
             if (Configuration.SaveBootstrapContext)
