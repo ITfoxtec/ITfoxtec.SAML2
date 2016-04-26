@@ -2,17 +2,31 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>TechSmith.ITfoxtec.Saml2</id>
-        <version>1.0</version>
+        <version>1.0.1</version>
         <title>TechSmith ITfoxtec SAML 2.0</title>
         <authors>ITfoxtec</authors>
         <owners>ITfoxtec</owners>
         <licenseUrl>http://www.itfoxtec.com/License/3clauseBSD.htm</licenseUrl>
         <projectUrl>http://www.itfoxtec.com/saml2</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>The ITfoxtec SAML 2.0 package adds SAML-P support on top of the SAML 2.0 token functionality implemented in the .NET framework.
-Supports: Message signing and validation as well as decryption. Login, logout, single logout and metadata. Both SP Initiated and IdP Initiated sign on. The Danish OIOSAML 2.0 profile and NemLog-in.
+        <description>
+           The ITfoxtec SAML 2.0 package adds SAML-P support on top of the SAML 2.0 token functionality implemented in the .NET framework.
+           Supports: Message signing and validation as well as decryption. Login, logout, single logout and metadata. Both SP Initiated and IdP Initiated sign on. The Danish OIOSAML 2.0 profile and NemLog-in.
 
-Supporting .NET 4.5</description>
+           Supporting .NET 4.5
+
+           New features:
+           Bugfixes:
+           * Ensure query string are built correctly
+           Breaking changes:
+        </description>
+        <releaseNotes>
+           New features:
+           Bugfixes:
+           * Ensure query strings are built correctly
+           Breaking changes:
+           Misc:
+        </releaseNotes>
         <copyright>© 2007 - 2014 ITfoxtec</copyright>
         <language>en-US</language>
         <tags>SAML SAML2.0 SAML2 SAML-P SAMLP SSO Authentication Metadata OIOSAML NemLog-in</tags>
