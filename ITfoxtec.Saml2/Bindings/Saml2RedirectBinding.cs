@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Xml;
 using ITfoxtec.Saml2.Schemas;
 using ITfoxtec.Saml2.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -34,39 +33,53 @@ namespace ITfoxtec.Saml2.Bindings
         {
             base.BindInternal(saml2RequestResponse, signingCertificate);
 
-            var requestQueryString = string.Join("&", RequestQueryString(signingCertificate, messageName));
-            if (signingCertificate != null)
-            {
-                requestQueryString = SigneQueryString(requestQueryString, signingCertificate);
-            }
+            var uriBuilder = new UriBuilder(saml2RequestResponse.Destination.Uri.OriginalString);
+            NameValueCollection queryString = HttpUtility.ParseQueryString(uriBuilder.Query);
+            queryString.Add(RequestQueryString(signingCertificate, messageName));
+            uriBuilder.Query = queryString.ToString();
 
-            RedirectLocation = new Uri(string.Join("?", saml2RequestResponse.Destination.Uri.OriginalString, requestQueryString));
-
+            RedirectLocation = uriBuilder.Uri;
             return this;
         }
-        
+
         private string SigneQueryString(string queryString, X509Certificate2 signingCertificate)
         {
             var saml2Signed = new Saml2Sign(signingCertificate.PrivateKey);
             SignatureAlgorithm = signingCertificate.PrivateKey.SignatureAlgorithm;
             Signature = Convert.ToBase64String(saml2Signed.SignData(Encoding.UTF8.GetBytes(queryString)));
 
-            return string.Join("&", queryString, string.Join("=", Saml2Constants.Message.Signature, HttpUtility.UrlEncode(Signature)));
+            return HttpUtility.UrlEncode(Signature);
         }
 
-        private IEnumerable<string> RequestQueryString(X509Certificate2 signingCertificate, string messageName)
+        private NameValueCollection RequestQueryString(X509Certificate2 signingCertificate, string messageName)
         {
-            yield return string.Join("=", messageName, HttpUtility.UrlEncode(CompressRequest()));
+            var queryString = new NameValueCollection();
+            var message = HttpUtility.UrlEncode(CompressRequest());
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+               queryString.Add(messageName, message);
+            }
 
             if (!string.IsNullOrWhiteSpace(RelayState))
             {
-                yield return string.Join("=", Saml2Constants.Message.RelayState, HttpUtility.UrlEncode(RelayState));
+                var relayState = HttpUtility.UrlEncode(RelayState);
+                if (!string.IsNullOrWhiteSpace(relayState))
+                {
+                   queryString.Add(Saml2Constants.Message.RelayState, relayState);
+                }
             }
 
             if(signingCertificate != null)
             {
-                yield return string.Join("=", Saml2Constants.Message.SigAlg, HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm));
+                var signatureAlgorithm = HttpUtility.UrlEncode(signingCertificate.PrivateKey.SignatureAlgorithm);
+                if (!string.IsNullOrWhiteSpace(signatureAlgorithm))
+                {
+                   queryString.Add(Saml2Constants.Message.SigAlg, signatureAlgorithm);
+                }
+
+                queryString.Add(Saml2Constants.Message.Signature, SigneQueryString(queryString.ToString(),signingCertificate));
             }
+            return queryString;
         }
 
         private string CompressRequest()
