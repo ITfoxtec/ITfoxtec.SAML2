@@ -27,7 +27,6 @@ namespace ITfoxtec.Saml2.Cryptography
 
         private void AddAlgorithm()
         {
-            // For SHA256
             if (CryptoConfig.CreateFromName(SecurityAlgorithms.RsaSha256Signature) == null)
             {
                 CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA256SignatureDescription), SecurityAlgorithms.RsaSha256Signature);
@@ -72,11 +71,6 @@ namespace ITfoxtec.Saml2.Cryptography
             {
                 throw new CryptographicException("SHA256 algorithm is not supported.", cExc);
             }
-        }
-
-        protected new void ComputeSignature()
-        {
-            base.ComputeSignature();
         }
     }
 }
