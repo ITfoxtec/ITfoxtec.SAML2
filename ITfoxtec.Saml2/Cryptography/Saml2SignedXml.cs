@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
@@ -7,11 +8,9 @@ using Security.Cryptography.X509Certificates;
 
 namespace ITfoxtec.Saml2.Cryptography
 {
-    using System.Collections;
-
-    public class Saml2SignedXml : System.Security.Cryptography.Xml.SignedXml
+    public class Saml2SignedXml : SignedXml
     {
-        public Saml2SignedXml() : base()
+        public Saml2SignedXml()
         {
             AddAlgorithm();
         }
@@ -39,9 +38,8 @@ namespace ITfoxtec.Saml2.Cryptography
         {
             if (certificate.HasCngKey())
             {
-                CngKey key = certificate.GetCngPrivateKey();
-                RSACng rsa = new RSACng(key);
-                rsa.EncryptionPaddingMode = AsymmetricPaddingMode.Pkcs1;
+                var key = certificate.GetCngPrivateKey();
+                var rsa = new RSACng(key) {EncryptionPaddingMode = AsymmetricPaddingMode.Pkcs1};
                 SigningKey = rsa;
             }
             else
@@ -68,7 +66,7 @@ namespace ITfoxtec.Saml2.Cryptography
         {
             try
             {
-                return base.CheckSignature(certificate, true);
+                return CheckSignature(certificate, true);
             }
             catch (CryptographicException cExc)
             {
