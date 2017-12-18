@@ -164,7 +164,15 @@ namespace ITfoxtec.Saml2
             var issuerString = XmlDocument.DocumentElement[Saml2Constants.Message.Issuer, Saml2Constants.AssertionNamespace.OriginalString].GetTextOrNull();
             if (!string.IsNullOrEmpty(issuerString))
             {
-                Issuer = new EndpointReference(issuerString);
+                try
+                {
+                   Uri issuerUri = new UriBuilder( issuerString ).Uri;
+                   Issuer = new EndpointReference( issuerUri.AbsoluteUri );
+                }
+                catch ( Exception ex )
+                {
+                   Trace.TraceError( "Could not format issuer as a URI, issuer: {0} exception: {1}", issuerString, ex );
+                }
             }
 
             var destinationString = XmlDocument.DocumentElement.Attributes[Saml2Constants.Message.Destination].GetValueOrNull();
