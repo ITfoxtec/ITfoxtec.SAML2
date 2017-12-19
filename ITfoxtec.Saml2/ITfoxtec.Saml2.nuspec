@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>TechSmith.ITfoxtec.Saml2</id>
-        <version>1.0.2</version>
+        <version>1.1.0</version>
         <title>TechSmith ITfoxtec SAML 2.0</title>
         <authors>ITfoxtec</authors>
         <owners>ITfoxtec</owners>
@@ -17,13 +17,13 @@
 
            New features:
            Bugfixes:
-           * Revert changes from 1.0.1
+           * Handle Issuer values that do not have scheme but are otherwise valid URIs.
            Breaking changes:
         </description>
         <releaseNotes>
            New features:
            Bugfixes:
-           * Revert changes from 1.0.1
+           * Handle Issuer values that do not have scheme but are otherwise valid URIs.
            Breaking changes:
            Misc:
         </releaseNotes>
