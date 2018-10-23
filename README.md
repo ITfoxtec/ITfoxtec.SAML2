@@ -1,6 +1,5 @@
-<a href="http://itfoxtec.com/Saml2">ITfoxtec.SAML2</a>
-==============
-<br />
+# ITfoxtec.SAML2
+
 <strong>
 Maintenance of this component is discontinued. Please use the <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> component instead.
 </strong>
