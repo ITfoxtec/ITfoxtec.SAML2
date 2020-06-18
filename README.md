@@ -3,7 +3,7 @@
 <strong>Maintenance of this component is discontinued. Please use the <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> component instead.</strong> 
 <br /><br />
 
-> <strong>I strongly recommend updating to the new komponent <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> because there are a handful of security issues with this old komponent.</strong>
+> <strong>I strongly recommend updating to the new component <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> because there are a handful of security issues with this old component.</strong>
   
 <br /><br />
 
