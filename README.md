@@ -2,7 +2,10 @@
 
 <strong>
 Maintenance of this component is discontinued. Please use the <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> component instead.
-</strong>
+</strong> 
+
+> <strong>I strongly recommend updating to the new komponent <a href="https://itfoxtec.com/identitysaml2">ITfoxtec Identity Saml2</a> because there are a handful of security issues with this old komponent.</strong>
+  
 <br /><br />
 
 The ITfoxtec SAML 2.0 package adds SAML-P support on top of the SAML 2.0 token functionality implemented in the .NET framework.
