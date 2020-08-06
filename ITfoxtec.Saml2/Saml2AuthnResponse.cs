@@ -122,14 +122,14 @@ namespace ITfoxtec.Saml2
             }
 
             var notOnOrAfter = DateTime.Parse(subjectConfirmationData.Attributes[Saml2Constants.Message.NotOnOrAfter].GetValueOrNull(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-            var now = DateTime.UtcNow;
 
             if (clockTolerance.HasValue)
             {
-                now += clockTolerance.Value;
+                // 'Add' the tolerance to the assertion date
+                notOnOrAfter += clockTolerance.Value;
             }
 
-            if (notOnOrAfter < now)
+            if (notOnOrAfter < DateTime.UtcNow)
             {
                 throw new Saml2ResponseException(string.Format("Assertion has expired. Assertion valid NotOnOrAfter {0}.", notOnOrAfter));
             }
