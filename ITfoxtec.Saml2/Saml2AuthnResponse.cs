@@ -98,7 +98,12 @@ namespace ITfoxtec.Saml2
             return assertionElements[0];
         }
 
-        private void ValidateAssertionExpiration(XmlNode assertionElement)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="assertionElement"></param>
+        /// <param name="clockTolerance">Allow for clock slip of this amount (on top of what the IDP already includes in the NotOnOrAfter assertion)</param>
+        private void ValidateAssertionExpiration(XmlNode assertionElement, TimeSpan? clockTolerance = null)
         {
             var subjectElement = assertionElement[Saml2Constants.Message.Subject, Saml2Constants.AssertionNamespace.OriginalString];
             if(subjectElement == null)
@@ -117,7 +122,14 @@ namespace ITfoxtec.Saml2
             }
 
             var notOnOrAfter = DateTime.Parse(subjectConfirmationData.Attributes[Saml2Constants.Message.NotOnOrAfter].GetValueOrNull(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-            if(notOnOrAfter < DateTime.UtcNow)
+            var now = DateTime.UtcNow;
+
+            if (clockTolerance.HasValue)
+            {
+                now += clockTolerance.Value;
+            }
+
+            if (notOnOrAfter < now)
             {
                 throw new Saml2ResponseException(string.Format("Assertion has expired. Assertion valid NotOnOrAfter {0}.", notOnOrAfter));
             }
