@@ -77,7 +77,7 @@ namespace ITfoxtec.Saml2
             return XmlDocument;
         }
 
-        internal override void Read(string xml, bool validateXmlSignature = false)
+        internal override void Read(string xml, bool validateXmlSignature = false, TimeSpan? clockTolerance = null)
         {
             throw new NotImplementedException();
         }

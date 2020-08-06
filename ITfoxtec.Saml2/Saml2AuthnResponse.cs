@@ -74,14 +74,14 @@ namespace ITfoxtec.Saml2
             throw new NotImplementedException();
         }
 
-        internal override void Read(string xml, bool validateXmlSignature = false)
+        internal override void Read(string xml, bool validateXmlSignature = false, TimeSpan? clockTolerance = null)
         {
             base.Read(xml, validateXmlSignature);
 
             if (Status == Saml2StatusCodes.Success)
             {
                 var assertionElement = GetAssertionElement();
-                ValidateAssertionExpiration(assertionElement);
+                ValidateAssertionExpiration(assertionElement, clockTolerance: clockTolerance);
 
                 Saml2SecurityToken = ReadSecurityToken(assertionElement);
                 ClaimsIdentity = ReadClaimsIdentity();

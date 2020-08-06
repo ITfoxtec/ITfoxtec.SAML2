@@ -19,6 +19,12 @@ namespace ITfoxtec.Saml2.Bindings
         public X509IncludeOption CertificateIncludeOption { get; set; }
 
         /// <summary>
+        /// [Optional]
+        /// Allow for clock slip of this amount (on top of what the IDP already includes in the NotOnOrAfter assertion)
+        /// </summary>
+        public TimeSpan? ClockTolerance { get; set; }
+
+        /// <summary>
         /// Html post content.
         /// </summary>
         public string PostContent { get; set; }
@@ -118,7 +124,7 @@ namespace ITfoxtec.Saml2.Bindings
                 RelayState = request.Form[Saml2Constants.Message.RelayState];
             }
 
-            saml2RequestResponse.Read(Encoding.UTF8.GetString(Convert.FromBase64String(request.Form[messageName])), true);
+            saml2RequestResponse.Read(Encoding.UTF8.GetString(Convert.FromBase64String(request.Form[messageName])), true, clockTolerance: this.ClockTolerance);
             XmlDocument = saml2RequestResponse.XmlDocument;
             return saml2RequestResponse;
         }

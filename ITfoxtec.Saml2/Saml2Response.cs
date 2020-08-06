@@ -40,7 +40,7 @@ namespace ITfoxtec.Saml2
                     new XAttribute(Saml2Constants.Message.Value, Saml2StatusCodeUtil.ToString(Status))));
         }
 
-        internal override void Read(string xml, bool validateXmlSignature = false)
+        internal override void Read(string xml, bool validateXmlSignature = false, TimeSpan? clockTolerance = null)
         {
             base.Read(xml, validateXmlSignature);
 

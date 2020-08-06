@@ -136,7 +136,7 @@ namespace ITfoxtec.Saml2
             return result;
         }
 
-        internal virtual void Read(string xml, bool validateXmlSignature = false)
+        internal virtual void Read(string xml, bool validateXmlSignature = false, TimeSpan? clockTolerance = null)
         {
 #if DEBUG
             Debug.WriteLine("Saml2P: " + xml);
